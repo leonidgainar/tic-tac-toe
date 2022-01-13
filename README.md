@@ -1,6 +1,6 @@
 # Vue 3 + Vite
 
-## Live [demo]()
+## Live [demo](https://vue-tic-tac-toe-game.netlify.app/)
 
 ## Recommended IDE Setup
 
