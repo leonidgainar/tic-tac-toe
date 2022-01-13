@@ -1,18 +1,18 @@
 <template>
   <div
-    class="fixed z-10 inset-0 overflow-y-auto"
+    class="fixed z-10 inset-0 overflow-y-auto mt-10"
     aria-labelledby="modal-title"
     role="dialog"
     aria-modal="true"
     v-if="gameIsOver"
   >
-    <div class="flex items-center justify-center px-4">
+    <div class="flex items-top justify-center px-4">
       <div
         class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
         aria-hidden="true"
       ></div>
 
-      <span class="sm:inline-block h-screen" aria-hidden="true"> &#8203; </span>
+      <span class="sm:inline-block" aria-hidden="true"> &#8203; </span>
 
       <div
         class="inline-block bg-white rounded-lg text-center overflow-hidden shadow-xl transform transition-all sm:max-w-lg w-full"

@@ -76,18 +76,80 @@ export default {
     checkVictory(playerClickedFields) {
       let victory = false;
       this.winningCombinations.forEach((winCombination) => {
-        let winningMoves = 0;
+        let movesToWin = 0;
         playerClickedFields.forEach((move) => {
           if (winCombination.includes(move)) {
-            winningMoves++;
+            movesToWin++;
           }
-          if (winningMoves === 3) {
+          if (movesToWin === 3) {
             victory = true;
             this.winningCombination = winCombination;
           }
         });
       });
       return victory;
+    },
+
+    getPlayerBestCombination(playerMoves) {
+      let maxMovesForWin = 0;
+      let bestCombination = [];
+
+      this.winningCombinations.forEach((winCombination) => {
+        let movesForWin = 0;
+
+        playerMoves.forEach((move) => {
+          if (winCombination.includes(move)) {
+            movesForWin++;
+          }
+          if (maxMovesForWin <= movesForWin) {
+            maxMovesForWin = movesForWin;
+            bestCombination = winCombination;
+          }
+        });
+      });
+
+      return { maxMovesForWin, bestCombination };
+    },
+
+    getBotNextMove() {
+      const player1Stats = this.getPlayerBestCombination(this.player1Moves);
+      const player2Stats = this.getPlayerBestCombination(this.player2Moves);
+
+      let potentialNextMoves = [];
+
+      if (player1Stats.maxMovesForWin > player2Stats.maxMovesForWin) {
+        potentialNextMoves = player1Stats.bestCombination.filter(
+          (move) => !this.usedFields.includes(move)
+        );
+      } else {
+        potentialNextMoves = player2Stats.bestCombination.filter(
+          (move) => !this.usedFields.includes(move)
+        );
+      }
+
+      if (!potentialNextMoves.length) {
+        potentialNextMoves = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(
+          (move) => !this.usedFields.includes(move)
+        );
+      }
+
+      return potentialNextMoves[
+        Math.floor(Math.random() * potentialNextMoves.length)
+      ];
+    },
+
+    botNextMove() {
+      setTimeout(() => {
+        const bootMove = this.getBotNextMove();
+        this.player2Moves.push(bootMove);
+        const player2Wins = this.checkVictory(this.player2Moves);
+        if (player2Wins) {
+          this.gameResult = `Player X WINS!`;
+        } else {
+          this.currentPlayer = "O";
+        }
+        this.usedFields.push(bootMove);
+      }, 500);
     },
 
     restartGame() {
@@ -100,24 +162,18 @@ export default {
     },
 
     playerClickedField(field) {
-      if (this.currentPlayer === "O") {
-        this.player1Moves.push(field);
-        const player1Wins = this.checkVictory(this.player1Moves);
-        if (player1Wins) {
-          this.gameResult = `Player O WINS!`;
-        } else {
-          this.currentPlayer = "X";
-        }
+      this.player1Moves.push(field);
+      const player1Wins = this.checkVictory(this.player1Moves);
+      if (player1Wins) {
+        this.gameResult = `Player O WINS!`;
       } else {
-        this.player2Moves.push(field);
-        const player2Wins = this.checkVictory(this.player2Moves);
-        if (player2Wins) {
-          this.gameResult = `Player X WINS!`;
-        } else {
-          this.currentPlayer = "O";
-        }
+        this.currentPlayer = "X";
       }
       this.usedFields.push(field);
+
+      if (!player1Wins && this.usedFields.length < 9) {
+        this.botNextMove();
+      }
     },
 
     setTextColor(field) {
