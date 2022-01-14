@@ -13,7 +13,7 @@
             :key="n"
             :playerSymbol="setPlayerSymbol(n)"
             :textColor="setTextColor(n)"
-            @field-clicked="playerClickedField(n)"
+            @field-clicked="playerNextMove(n)"
           />
         </div>
       </div>
@@ -52,14 +52,16 @@ export default {
       player1Moves: [],
       player2Moves: [],
       winningCombination: [],
-      usedFields: [],
+      performedMoves: [],
       gameResult: "It's a DRAW!"
     };
   },
 
   computed: {
     gameIsOver() {
-      return this.winningCombination.length > 0 || this.usedFields.length === 9;
+      return (
+        this.winningCombination.length > 0 || this.performedMoves.length === 9
+      );
     }
   },
 
@@ -73,15 +75,15 @@ export default {
       }
     },
 
-    checkVictory(playerClickedFields) {
+    checkVictory(playerNextMoves) {
       let victory = false;
       this.winningCombinations.forEach((winCombination) => {
-        let movesToWin = 0;
-        playerClickedFields.forEach((move) => {
+        let goodMoves = 0;
+        playerNextMoves.forEach((move) => {
           if (winCombination.includes(move)) {
-            movesToWin++;
+            goodMoves++;
           }
-          if (movesToWin === 3) {
+          if (goodMoves === 3) {
             victory = true;
             this.winningCombination = winCombination;
           }
@@ -90,51 +92,50 @@ export default {
       return victory;
     },
 
-    getPlayerBestCombination(playerMoves) {
-      let maxMovesForWin = 0;
-      let bestCombination = [];
+    getPlayerPotentialBestMoves(playerNextMoves) {
+      let playerPotentialBestMoves = [];
 
       this.winningCombinations.forEach((winCombination) => {
-        let movesForWin = 0;
+        let goodMoves = 0;
 
-        playerMoves.forEach((move) => {
+        playerNextMoves.forEach((move) => {
           if (winCombination.includes(move)) {
-            movesForWin++;
+            goodMoves++;
           }
-          if (maxMovesForWin <= movesForWin) {
-            maxMovesForWin = movesForWin;
-            bestCombination = winCombination;
+          if (goodMoves === 2) {
+            const remainingMovesForWinCombination = winCombination.filter(
+              (move) => !this.performedMoves.includes(move)
+            );
+            playerPotentialBestMoves.push(...remainingMovesForWinCombination);
           }
         });
       });
 
-      return { maxMovesForWin, bestCombination };
+      return [...new Set(playerPotentialBestMoves)];
     },
 
     getBotNextMove() {
-      const player1Stats = this.getPlayerBestCombination(this.player1Moves);
-      const player2Stats = this.getPlayerBestCombination(this.player2Moves);
+      const player1playerPotentialBestMoves = this.getPlayerPotentialBestMoves(
+        this.player1Moves
+      );
+      const player2playerPotentialBestMoves = this.getPlayerPotentialBestMoves(
+        this.player2Moves
+      );
 
-      let potentialNextMoves = [];
+      let botPotentialNextMoves = [];
 
-      if (player1Stats.maxMovesForWin > player2Stats.maxMovesForWin) {
-        potentialNextMoves = player1Stats.bestCombination.filter(
-          (move) => !this.usedFields.includes(move)
-        );
+      if (player2playerPotentialBestMoves.length) {
+        botPotentialNextMoves = player2playerPotentialBestMoves;
+      } else if (player1playerPotentialBestMoves.length) {
+        botPotentialNextMoves = player1playerPotentialBestMoves;
       } else {
-        potentialNextMoves = player2Stats.bestCombination.filter(
-          (move) => !this.usedFields.includes(move)
+        botPotentialNextMoves = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(
+          (move) => !this.performedMoves.includes(move)
         );
       }
 
-      if (!potentialNextMoves.length) {
-        potentialNextMoves = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(
-          (move) => !this.usedFields.includes(move)
-        );
-      }
-
-      return potentialNextMoves[
-        Math.floor(Math.random() * potentialNextMoves.length)
+      return botPotentialNextMoves[
+        Math.floor(Math.random() * botPotentialNextMoves.length)
       ];
     },
 
@@ -148,7 +149,7 @@ export default {
         } else {
           this.currentPlayer = "O";
         }
-        this.usedFields.push(bootMove);
+        this.performedMoves.push(bootMove);
       }, 500);
     },
 
@@ -157,21 +158,21 @@ export default {
       this.player1Moves = [];
       this.player2Moves = [];
       this.winningCombination = [];
-      this.usedFields = [];
+      this.performedMoves = [];
       this.gameResult = "It's a DRAW!";
     },
 
-    playerClickedField(field) {
-      this.player1Moves.push(field);
+    playerNextMove(move) {
+      this.player1Moves.push(move);
       const player1Wins = this.checkVictory(this.player1Moves);
       if (player1Wins) {
         this.gameResult = `Player O WINS!`;
       } else {
         this.currentPlayer = "X";
       }
-      this.usedFields.push(field);
+      this.performedMoves.push(move);
 
-      if (!player1Wins && this.usedFields.length < 9) {
+      if (!player1Wins && this.performedMoves.length < 9) {
         this.botNextMove();
       }
     },
