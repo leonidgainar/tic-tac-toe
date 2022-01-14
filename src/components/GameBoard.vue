@@ -2,10 +2,41 @@
   <div class="text-center">
     <h1 class="text-4xl text-center">Tic-Tac-Toe Game</h1>
     <div class="text-2xl pt-10">Match #{{ matchCounter }}</div>
-    <div v-if="!gameIsOver" class="text-2xl py-10">
-      Current player: {{ currentPlayer }}
+    <div class="flex justify-center text-center">
+      <div>
+        <h2 class="text-xl pt-5">Who starts the next game?</h2>
+        <div class="form-check pt-5">
+          <input
+            class="form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
+            type="radio"
+            v-model="selectedPlayer"
+            value="O"
+            id="playerO"
+          />
+          <label
+            class="form-check-label inline-block text-gray-800"
+            for="playerO"
+          >
+            You (Player O)
+          </label>
+        </div>
+        <div class="form-check pt-3 pb-5">
+          <input
+            class="form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-red-600 checked:border-red-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
+            type="radio"
+            v-model="selectedPlayer"
+            value="X"
+            id="playerX"
+          />
+          <label
+            class="form-check-label inline-block text-gray-800"
+            for="playerX"
+          >
+            Bot (Player X)
+          </label>
+        </div>
+      </div>
     </div>
-    <div v-else class="text-2xl py-10">Game over!</div>
     <div class="min-w-full">
       <div class="bg-blue-200 shadow-xl rounded-lg">
         <div class="grid grid-cols-3 gap-1 md:gap-2 text-4xl md:text-6xl p-5">
@@ -64,7 +95,8 @@ export default {
       gameResult: "It's a DRAW!",
       matchCounter: 1,
       playerOWinsCount: 0,
-      playerXWinsCount: 0
+      playerXWinsCount: 0,
+      selectedPlayer: "X"
     };
   },
 
@@ -90,11 +122,11 @@ export default {
       }
     },
 
-    checkVictory(playerNextMoves) {
+    checkVictory(playerMoves) {
       let victory = false;
       this.winningCombinations.forEach((winCombination) => {
         let goodMoves = 0;
-        playerNextMoves.forEach((move) => {
+        playerMoves.forEach((move) => {
           if (winCombination.includes(move)) {
             goodMoves++;
           }
@@ -107,13 +139,13 @@ export default {
       return victory;
     },
 
-    getPlayerPotentialBestMoves(playerNextMoves) {
+    getPlayerPotentialBestMoves(playerMoves) {
       let playerPotentialBestMoves = [];
 
       this.winningCombinations.forEach((winCombination) => {
         let goodMoves = 0;
 
-        playerNextMoves.forEach((move) => {
+        playerMoves.forEach((move) => {
           if (winCombination.includes(move)) {
             goodMoves++;
           }
@@ -160,7 +192,7 @@ export default {
         this.playerXMoves.push(bootMove);
         const playerXWins = this.checkVictory(this.playerXMoves);
         if (playerXWins) {
-          this.gameResult = `Player X WINS!`;
+          this.gameResult = `Player ${this.currentPlayer} WINS!`;
           this.playerXWinsCount++;
         } else {
           this.currentPlayer = "O";
@@ -177,14 +209,16 @@ export default {
       this.winningCombination = [];
       this.performedMoves = [];
       this.gameResult = "It's a DRAW!";
-      this.botNextMove();
+      if (this.selectedPlayer === "X") {
+        this.botNextMove();
+      }
     },
 
     playerNextMove(move) {
       this.playerOMoves.push(move);
       const playerOWins = this.checkVictory(this.playerOMoves);
       if (playerOWins) {
-        this.gameResult = `Player O WINS!`;
+        this.gameResult = `Player ${this.currentPlayer} WINS!`;
         this.playerOWinsCount++;
       } else {
         this.currentPlayer = "X";
