@@ -1,13 +1,13 @@
 <template>
   <div class="text-center">
     <h1 class="text-4xl text-center">Tic-Tac-Toe Game</h1>
-    <div class="text-2xl pt-10">Match #{{ matchCounter }}</div>
+    <div class="text-2xl pt-5">Match #{{ matchCounter }}</div>
     <div class="flex justify-center text-center">
       <div>
         <h2 class="text-xl pt-5">Who starts the next game?</h2>
         <div class="form-check pt-5">
           <input
-            class="form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
+            class="form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none align-top mt-1 mr-2 cursor-pointer"
             type="radio"
             v-model="selectedPlayer"
             value="O"
@@ -22,7 +22,7 @@
         </div>
         <div class="form-check pt-3 pb-5">
           <input
-            class="form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-red-600 checked:border-red-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
+            class="form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-red-600 checked:border-red-600 focus:outline-none align-top mt-1 mr-2 cursor-pointer"
             type="radio"
             v-model="selectedPlayer"
             value="X"
