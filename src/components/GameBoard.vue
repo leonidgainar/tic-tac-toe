@@ -1,10 +1,11 @@
 <template>
   <div class="text-center">
     <h1 class="text-4xl text-center">Tic-Tac-Toe Game</h1>
-    <h3 v-if="!gameIsOver" class="text-3xl py-10">
+    <div class="text-2xl pt-10">Match #{{ matchCounter }}</div>
+    <div v-if="!gameIsOver" class="text-2xl py-10">
       Current player: {{ currentPlayer }}
-    </h3>
-    <h3 v-else class="text-3xl py-10">Game is over!</h3>
+    </div>
+    <div v-else class="text-2xl py-10">Game over!</div>
     <div class="min-w-full">
       <div class="bg-blue-200 shadow-xl rounded-lg">
         <div class="grid grid-cols-3 gap-1 md:gap-2 text-4xl md:text-6xl p-5">
@@ -16,6 +17,13 @@
             @field-clicked="playerNextMove(n)"
           />
         </div>
+      </div>
+      <div class="text-2xl py-10">
+        <span class="text-blue-700">Player O</span>
+        <span class="text-4xl px-4">
+          {{ playerOWinsCount }} : {{ playerXWinsCount }}
+        </span>
+        <span class="text-red-700">Player X</span>
       </div>
     </div>
     <GameOverDialog
@@ -49,11 +57,14 @@ export default {
         [3, 5, 7]
       ],
       currentPlayer: "O",
-      player1Moves: [],
-      player2Moves: [],
+      playerOMoves: [],
+      playerXMoves: [],
       winningCombination: [],
       performedMoves: [],
-      gameResult: "It's a DRAW!"
+      gameResult: "It's a DRAW!",
+      matchCounter: 1,
+      playerOWinsCount: 0,
+      playerXWinsCount: 0
     };
   },
 
@@ -71,10 +82,10 @@ export default {
 
   methods: {
     setPlayerSymbol(field) {
-      if (this.player1Moves.includes(field)) {
+      if (this.playerOMoves.includes(field)) {
         return "O";
       }
-      if (this.player2Moves.includes(field)) {
+      if (this.playerXMoves.includes(field)) {
         return "X";
       }
     },
@@ -119,19 +130,19 @@ export default {
     },
 
     getBotNextMove() {
-      const player1playerPotentialBestMoves = this.getPlayerPotentialBestMoves(
-        this.player1Moves
+      const playerOplayerPotentialBestMoves = this.getPlayerPotentialBestMoves(
+        this.playerOMoves
       );
-      const player2playerPotentialBestMoves = this.getPlayerPotentialBestMoves(
-        this.player2Moves
+      const playerXplayerPotentialBestMoves = this.getPlayerPotentialBestMoves(
+        this.playerXMoves
       );
 
       let botPotentialNextMoves = [];
 
-      if (player2playerPotentialBestMoves.length) {
-        botPotentialNextMoves = player2playerPotentialBestMoves;
-      } else if (player1playerPotentialBestMoves.length) {
-        botPotentialNextMoves = player1playerPotentialBestMoves;
+      if (playerXplayerPotentialBestMoves.length) {
+        botPotentialNextMoves = playerXplayerPotentialBestMoves;
+      } else if (playerOplayerPotentialBestMoves.length) {
+        botPotentialNextMoves = playerOplayerPotentialBestMoves;
       } else {
         botPotentialNextMoves = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(
           (move) => !this.performedMoves.includes(move)
@@ -146,10 +157,11 @@ export default {
     botNextMove() {
       setTimeout(() => {
         const bootMove = this.getBotNextMove();
-        this.player2Moves.push(bootMove);
-        const player2Wins = this.checkVictory(this.player2Moves);
-        if (player2Wins) {
+        this.playerXMoves.push(bootMove);
+        const playerXWins = this.checkVictory(this.playerXMoves);
+        if (playerXWins) {
           this.gameResult = `Player X WINS!`;
+          this.playerXWinsCount++;
         } else {
           this.currentPlayer = "O";
         }
@@ -158,9 +170,10 @@ export default {
     },
 
     restartGame() {
+      this.matchCounter++;
       this.currentPlayer = "O";
-      this.player1Moves = [];
-      this.player2Moves = [];
+      this.playerOMoves = [];
+      this.playerXMoves = [];
       this.winningCombination = [];
       this.performedMoves = [];
       this.gameResult = "It's a DRAW!";
@@ -168,16 +181,17 @@ export default {
     },
 
     playerNextMove(move) {
-      this.player1Moves.push(move);
-      const player1Wins = this.checkVictory(this.player1Moves);
-      if (player1Wins) {
+      this.playerOMoves.push(move);
+      const playerOWins = this.checkVictory(this.playerOMoves);
+      if (playerOWins) {
         this.gameResult = `Player O WINS!`;
+        this.playerOWinsCount++;
       } else {
         this.currentPlayer = "X";
       }
       this.performedMoves.push(move);
 
-      if (!player1Wins && this.performedMoves.length < 9) {
+      if (!playerOWins && this.performedMoves.length < 9) {
         this.botNextMove();
       }
     },
