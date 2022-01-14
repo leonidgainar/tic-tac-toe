@@ -65,6 +65,10 @@ export default {
     }
   },
 
+  mounted() {
+    this.botNextMove();
+  },
+
   methods: {
     setPlayerSymbol(field) {
       if (this.player1Moves.includes(field)) {
@@ -150,7 +154,7 @@ export default {
           this.currentPlayer = "O";
         }
         this.performedMoves.push(bootMove);
-      }, 500);
+      }, 150);
     },
 
     restartGame() {
@@ -160,6 +164,7 @@ export default {
       this.winningCombination = [];
       this.performedMoves = [];
       this.gameResult = "It's a DRAW!";
+      this.botNextMove();
     },
 
     playerNextMove(move) {
