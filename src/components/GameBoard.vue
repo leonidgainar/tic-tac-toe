@@ -139,8 +139,8 @@ export default {
       return victory;
     },
 
-    getPlayerPotentialBestMoves(playerMoves) {
-      let playerPotentialBestMoves = [];
+    getNextBestMoves(playerMoves) {
+      let nextBestMoves = [];
 
       this.winningCombinations.forEach((winCombination) => {
         let goodMoves = 0;
@@ -150,40 +150,34 @@ export default {
             goodMoves++;
           }
           if (goodMoves === 2) {
-            const remainingMovesForWinCombination = winCombination.filter(
+            const remainingMovesForWin = winCombination.filter(
               (move) => !this.performedMoves.includes(move)
             );
-            playerPotentialBestMoves.push(...remainingMovesForWinCombination);
+            nextBestMoves.push(...remainingMovesForWin);
           }
         });
       });
 
-      return [...new Set(playerPotentialBestMoves)];
+      return [...new Set(nextBestMoves)];
     },
 
     getBotNextMove() {
-      const playerOplayerPotentialBestMoves = this.getPlayerPotentialBestMoves(
-        this.playerOMoves
-      );
-      const playerXplayerPotentialBestMoves = this.getPlayerPotentialBestMoves(
-        this.playerXMoves
-      );
+      const playerNextBestMoves = this.getNextBestMoves(this.playerOMoves);
+      const botNextBestMoves = this.getNextBestMoves(this.playerXMoves);
 
-      let botPotentialNextMoves = [];
+      let botNextMoves = [];
 
-      if (playerXplayerPotentialBestMoves.length) {
-        botPotentialNextMoves = playerXplayerPotentialBestMoves;
-      } else if (playerOplayerPotentialBestMoves.length) {
-        botPotentialNextMoves = playerOplayerPotentialBestMoves;
+      if (botNextBestMoves.length) {
+        botNextMoves = botNextBestMoves;
+      } else if (playerNextBestMoves.length) {
+        botNextMoves = playerNextBestMoves;
       } else {
-        botPotentialNextMoves = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(
+        botNextMoves = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(
           (move) => !this.performedMoves.includes(move)
         );
       }
 
-      return botPotentialNextMoves[
-        Math.floor(Math.random() * botPotentialNextMoves.length)
-      ];
+      return botNextMoves[Math.floor(Math.random() * botNextMoves.length)];
     },
 
     botNextMove() {
@@ -201,19 +195,6 @@ export default {
       }, 150);
     },
 
-    restartGame() {
-      this.matchCounter++;
-      this.currentPlayer = "O";
-      this.playerOMoves = [];
-      this.playerXMoves = [];
-      this.winningCombination = [];
-      this.performedMoves = [];
-      this.gameResult = "It's a DRAW!";
-      if (this.selectedPlayer === "X") {
-        this.botNextMove();
-      }
-    },
-
     playerNextMove(move) {
       this.playerOMoves.push(move);
       const playerOWins = this.checkVictory(this.playerOMoves);
@@ -226,6 +207,19 @@ export default {
       this.performedMoves.push(move);
 
       if (!playerOWins && this.performedMoves.length < 9) {
+        this.botNextMove();
+      }
+    },
+
+    restartGame() {
+      this.matchCounter++;
+      this.currentPlayer = "O";
+      this.playerOMoves = [];
+      this.playerXMoves = [];
+      this.winningCombination = [];
+      this.performedMoves = [];
+      this.gameResult = "It's a DRAW!";
+      if (this.selectedPlayer === "X") {
         this.botNextMove();
       }
     },
