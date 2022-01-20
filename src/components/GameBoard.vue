@@ -5,36 +5,9 @@
     <div class="flex justify-center text-center">
       <div>
         <h2 class="text-xl pt-5">Who starts the next game?</h2>
-        <div class="form-check pt-5">
-          <input
-            class="form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none align-top mt-1 mr-2 cursor-pointer"
-            type="radio"
-            v-model="selectedPlayer"
-            value="O"
-            id="playerO"
-          />
-          <label
-            class="form-check-label inline-block text-gray-800"
-            for="playerO"
-          >
-            You (Player O)
-          </label>
-        </div>
-        <div class="form-check pt-3 pb-5">
-          <input
-            class="form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-red-600 checked:border-red-600 focus:outline-none align-top mt-1 mr-2 cursor-pointer"
-            type="radio"
-            v-model="selectedPlayer"
-            value="X"
-            id="playerX"
-          />
-          <label
-            class="form-check-label inline-block text-gray-800"
-            for="playerX"
-          >
-            Bot (Player X)
-          </label>
-        </div>
+        <SelectPlayerRadioButtons
+          @change-selected-player="onChangeSelectedPlayer"
+        />
       </div>
     </div>
     <div class="min-w-full">
@@ -68,11 +41,13 @@
 <script>
 import GameBoardField from "./GameBoardField.vue";
 import GameOverDialog from "./GameOverDialog.vue";
+import SelectPlayerRadioButtons from "./SelectPlayerRadioButtons.vue";
 
 export default {
   components: {
     GameBoardField,
-    GameOverDialog
+    GameOverDialog,
+    SelectPlayerRadioButtons
   },
 
   data() {
@@ -120,6 +95,10 @@ export default {
       if (this.playerXMoves.includes(field)) {
         return "X";
       }
+    },
+
+    onChangeSelectedPlayer(currentPlayer) {
+      this.selectedPlayer = currentPlayer;
     },
 
     checkVictory(playerMoves) {
