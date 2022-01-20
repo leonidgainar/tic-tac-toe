@@ -27,7 +27,7 @@ export default {
       type: String,
       default: "X"
     },
-    restartGame: {
+    startNewGame: {
       type: Boolean,
       default: false
     }
@@ -54,7 +54,7 @@ export default {
   },
 
   watch: {
-    restartGame() {
+    startNewGame() {
       this.currentPlayer = "O";
       this.playerOMoves = [];
       this.playerXMoves = [];

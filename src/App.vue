@@ -3,17 +3,10 @@
     <div class="text-center">
       <h1 class="text-3xl px-2">Tic-Tac-Toe Game</h1>
       <div class="text-2xl pt-5 md:pt-10">Match #{{ matchCounter }}</div>
-      <div class="flex justify-center">
-        <div>
-          <h2 class="text-xl pt-5">Who starts the next game?</h2>
-          <SelectPlayerRadioButtons
-            @change-selected-player="onChangeSelectedPlayer"
-          />
-        </div>
-      </div>
+      <WhoStartsNextGame @change-selected-player="onChangeSelectedPlayer" />
       <GameBoard
         :selectedPlayer="selectedPlayer"
-        :restartGame="startNewGame"
+        :startNewGame="startNewGame"
         @player-wins="onPlayerWins"
         @game-over="onGameOver"
       />
@@ -31,17 +24,17 @@
 </template>
 
 <script>
-import GameOverDialog from "./components/GameOverDialog.vue";
-import SelectPlayerRadioButtons from "./components/SelectPlayerRadioButtons.vue";
-import GameScore from "./components/GameScore.vue";
+import WhoStartsNextGame from "./components/WhoStartsNextGame.vue";
 import GameBoard from "./components/GameBoard.vue";
+import GameScore from "./components/GameScore.vue";
+import GameOverDialog from "./components/GameOverDialog.vue";
 
 export default {
   components: {
-    GameOverDialog,
-    SelectPlayerRadioButtons,
+    WhoStartsNextGame,
+    GameBoard,
     GameScore,
-    GameBoard
+    GameOverDialog
   },
 
   data() {
