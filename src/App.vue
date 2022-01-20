@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen flex items-center justify-center">
     <div class="text-center">
-      <h1 class="text-4xl">Tic-Tac-Toe Game</h1>
-      <div class="text-2xl pt-5">Match #{{ matchCounter }}</div>
+      <h1 class="text-3xl px-2">Tic-Tac-Toe Game</h1>
+      <div class="text-2xl pt-5 md:pt-10">Match #{{ matchCounter }}</div>
       <div class="flex justify-center">
         <div>
           <h2 class="text-xl pt-5">Who starts the next game?</h2>

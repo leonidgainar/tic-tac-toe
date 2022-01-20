@@ -55,7 +55,6 @@ export default {
 
   watch: {
     restartGame() {
-      console.log("Start new game!");
       this.currentPlayer = "O";
       this.playerOMoves = [];
       this.playerXMoves = [];
