@@ -1,53 +1,36 @@
 <template>
-  <div class="text-center">
-    <h1 class="text-4xl text-center">Tic-Tac-Toe Game</h1>
-    <div class="text-2xl pt-5">Match #{{ matchCounter }}</div>
-    <div class="flex justify-center text-center">
-      <div>
-        <h2 class="text-xl pt-5">Who starts the next game?</h2>
-        <SelectPlayerRadioButtons
-          @change-selected-player="onChangeSelectedPlayer"
+  <div class="min-w-full">
+    <div class="bg-blue-200 shadow-xl rounded-lg">
+      <div class="grid grid-cols-3 gap-1 md:gap-2 text-4xl md:text-6xl p-5">
+        <GameBoardField
+          v-for="n in 9"
+          :key="n"
+          :playerSymbol="setPlayerSymbol(n)"
+          :textColor="setTextColor(n)"
+          @field-clicked="playerNextMove(n)"
         />
       </div>
     </div>
-    <div class="min-w-full">
-      <div class="bg-blue-200 shadow-xl rounded-lg">
-        <div class="grid grid-cols-3 gap-1 md:gap-2 text-4xl md:text-6xl p-5">
-          <GameBoardField
-            v-for="n in 9"
-            :key="n"
-            :playerSymbol="setPlayerSymbol(n)"
-            :textColor="setTextColor(n)"
-            @field-clicked="playerNextMove(n)"
-          />
-        </div>
-      </div>
-      <div class="text-2xl py-10">
-        <span class="text-blue-700">Player O</span>
-        <span class="text-4xl px-4">
-          {{ playerOWinsCount }} : {{ playerXWinsCount }}
-        </span>
-        <span class="text-red-700">Player X</span>
-      </div>
-    </div>
-    <GameOverDialog
-      :gameIsOver="gameIsOver"
-      :gameResult="gameResult"
-      @restart-game="restartGame"
-    />
   </div>
 </template>
 
 <script>
 import GameBoardField from "./GameBoardField.vue";
-import GameOverDialog from "./GameOverDialog.vue";
-import SelectPlayerRadioButtons from "./SelectPlayerRadioButtons.vue";
 
 export default {
   components: {
-    GameBoardField,
-    GameOverDialog,
-    SelectPlayerRadioButtons
+    GameBoardField
+  },
+
+  props: {
+    selectedPlayer: {
+      type: String,
+      default: "X"
+    },
+    restartGame: {
+      type: Boolean,
+      default: false
+    }
   },
 
   data() {
@@ -66,20 +49,21 @@ export default {
       playerOMoves: [],
       playerXMoves: [],
       winningCombination: [],
-      performedMoves: [],
-      gameResult: "It's a DRAW!",
-      matchCounter: 1,
-      playerOWinsCount: 0,
-      playerXWinsCount: 0,
-      selectedPlayer: "X"
+      performedMoves: []
     };
   },
 
-  computed: {
-    gameIsOver() {
-      return (
-        this.winningCombination.length > 0 || this.performedMoves.length === 9
-      );
+  watch: {
+    restartGame() {
+      console.log("Start new game!");
+      this.currentPlayer = "O";
+      this.playerOMoves = [];
+      this.playerXMoves = [];
+      this.winningCombination = [];
+      this.performedMoves = [];
+      if (this.selectedPlayer === "X") {
+        this.botNextMove();
+      }
     }
   },
 
@@ -97,10 +81,6 @@ export default {
       }
     },
 
-    onChangeSelectedPlayer(currentPlayer) {
-      this.selectedPlayer = currentPlayer;
-    },
-
     checkVictory(playerMoves) {
       let victory = false;
       this.winningCombinations.forEach((winCombination) => {
@@ -112,6 +92,7 @@ export default {
           if (goodMoves === 3) {
             victory = true;
             this.winningCombination = winCombination;
+            this.$emit("game-over");
           }
         });
       });
@@ -141,10 +122,9 @@ export default {
     },
 
     getBotNextMove() {
+      let botNextMoves = [];
       const playerNextBestMoves = this.getNextBestMoves(this.playerOMoves);
       const botNextBestMoves = this.getNextBestMoves(this.playerXMoves);
-
-      let botNextMoves = [];
 
       if (botNextBestMoves.length) {
         botNextMoves = botNextBestMoves;
@@ -165,12 +145,14 @@ export default {
         this.playerXMoves.push(bootMove);
         const playerXWins = this.checkVictory(this.playerXMoves);
         if (playerXWins) {
-          this.gameResult = `Player ${this.currentPlayer} WINS!`;
-          this.playerXWinsCount++;
+          this.$emit("player-wins", this.currentPlayer);
         } else {
           this.currentPlayer = "O";
         }
         this.performedMoves.push(bootMove);
+        if (this.performedMoves.length === 9) {
+          this.$emit("game-over");
+        }
       }, 150);
     },
 
@@ -178,27 +160,15 @@ export default {
       this.playerOMoves.push(move);
       const playerOWins = this.checkVictory(this.playerOMoves);
       if (playerOWins) {
-        this.gameResult = `Player ${this.currentPlayer} WINS!`;
-        this.playerOWinsCount++;
+        this.$emit("player-wins", this.currentPlayer);
       } else {
         this.currentPlayer = "X";
       }
       this.performedMoves.push(move);
-
-      if (!playerOWins && this.performedMoves.length < 9) {
-        this.botNextMove();
+      if (this.performedMoves.length === 9) {
+        this.$emit("game-over");
       }
-    },
-
-    restartGame() {
-      this.matchCounter++;
-      this.currentPlayer = "O";
-      this.playerOMoves = [];
-      this.playerXMoves = [];
-      this.winningCombination = [];
-      this.performedMoves = [];
-      this.gameResult = "It's a DRAW!";
-      if (this.selectedPlayer === "X") {
+      if (!playerOWins) {
         this.botNextMove();
       }
     },
