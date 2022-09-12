@@ -46,8 +46,8 @@ export default {
         [3, 5, 7]
       ],
       currentPlayer: "O",
-      playerOMoves: [],
-      playerXMoves: [],
+      humanPlayerMoves: [],
+      botPlayerMoves: [],
       winningCombination: [],
       performedMoves: []
     };
@@ -56,8 +56,8 @@ export default {
   watch: {
     startNewGame() {
       this.currentPlayer = "O";
-      this.playerOMoves = [];
-      this.playerXMoves = [];
+      this.humanPlayerMoves = [];
+      this.botPlayerMoves = [];
       this.winningCombination = [];
       this.performedMoves = [];
       if (this.selectedPlayer === "X") {
@@ -72,10 +72,10 @@ export default {
 
   methods: {
     setPlayerSymbol(field) {
-      if (this.playerOMoves.includes(field)) {
+      if (this.humanPlayerMoves.includes(field)) {
         return "O";
       }
-      if (this.playerXMoves.includes(field)) {
+      if (this.botPlayerMoves.includes(field)) {
         return "X";
       }
     },
@@ -83,12 +83,12 @@ export default {
     checkVictory(playerMoves) {
       let victory = false;
       this.winningCombinations.forEach((winCombination) => {
-        let goodMoves = 0;
+        let goodMovesCount = 0;
         playerMoves.forEach((move) => {
           if (winCombination.includes(move)) {
-            goodMoves++;
+            goodMovesCount++;
           }
-          if (goodMoves === 3) {
+          if (goodMovesCount === 3) {
             victory = true;
             this.winningCombination = winCombination;
             this.$emit("game-over");
@@ -102,13 +102,13 @@ export default {
       let nextBestMoves = [];
 
       this.winningCombinations.forEach((winCombination) => {
-        let goodMoves = 0;
+        let goodMovesCount = 0;
 
         playerMoves.forEach((move) => {
           if (winCombination.includes(move)) {
-            goodMoves++;
+            goodMovesCount++;
           }
-          if (goodMoves === 2) {
+          if (goodMovesCount === 2) {
             const remainingMovesForWin = winCombination.filter(
               (move) => !this.performedMoves.includes(move)
             );
@@ -122,8 +122,8 @@ export default {
 
     getBotNextMove() {
       let botNextMoves = [];
-      const playerNextBestMoves = this.getNextBestMoves(this.playerOMoves);
-      const botNextBestMoves = this.getNextBestMoves(this.playerXMoves);
+      const playerNextBestMoves = this.getNextBestMoves(this.humanPlayerMoves);
+      const botNextBestMoves = this.getNextBestMoves(this.botPlayerMoves);
 
       if (botNextBestMoves.length) {
         botNextMoves = botNextBestMoves;
@@ -141,9 +141,9 @@ export default {
     botNextMove() {
       setTimeout(() => {
         const bootMove = this.getBotNextMove();
-        this.playerXMoves.push(bootMove);
-        const playerXWins = this.checkVictory(this.playerXMoves);
-        if (playerXWins) {
+        this.botPlayerMoves.push(bootMove);
+        const botPlayerWins = this.checkVictory(this.botPlayerMoves);
+        if (botPlayerWins) {
           this.$emit("player-wins", this.currentPlayer);
         } else {
           this.currentPlayer = "O";
@@ -156,9 +156,9 @@ export default {
     },
 
     playerNextMove(move) {
-      this.playerOMoves.push(move);
-      const playerOWins = this.checkVictory(this.playerOMoves);
-      if (playerOWins) {
+      this.humanPlayerMoves.push(move);
+      const humanPlayer = this.checkVictory(this.humanPlayerMoves);
+      if (humanPlayer) {
         this.$emit("player-wins", this.currentPlayer);
       } else {
         this.currentPlayer = "X";
@@ -167,7 +167,7 @@ export default {
       if (this.performedMoves.length === 9) {
         this.$emit("game-over");
       }
-      if (!playerOWins) {
+      if (!humanPlayer) {
         this.botNextMove();
       }
     },
