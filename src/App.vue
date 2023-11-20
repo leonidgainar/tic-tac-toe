@@ -3,7 +3,7 @@
     <div class="text-center">
       <h1 class="text-3xl px-2">Tic-Tac-Toe Game</h1>
       <div class="text-2xl pt-5 md:pt-10">Match #{{ matchCounter }}</div>
-      <div class="flex justify-between col-span-12">
+      <div class="flex flex-col md:flex-row">
         <GameMode @change-game-mode="onChangeGameMode" />
         <WhoStartsNextGame :game-mode="selectedGameMode" @change-selected-player="onChangeSelectedPlayer" />
       </div>

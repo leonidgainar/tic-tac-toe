@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-start col-span-6">
+  <div class="flex justify-start basis-full md:basis-1/2">
     <div>
       <h2 class="text-xl pt-5">Who starts the next game?</h2>
       <div class="text-left">
