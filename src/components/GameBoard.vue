@@ -2,13 +2,8 @@
   <div class="min-w-full">
     <div class="bg-blue-200 shadow-xl rounded-lg">
       <div class="grid grid-cols-3 gap-1 md:gap-2 text-4xl md:text-6xl p-5">
-        <GameBoardField
-          v-for="n in 9"
-          :key="n"
-          :playerSymbol="setPlayerSymbol(n)"
-          :textColor="setTextColor(n)"
-          @field-clicked="currentPlayer === 'O' ? player1NextMove(n) : player2NextMove(n)"
-        />
+        <GameBoardField v-for="n in 9" :key="n" :playerSymbol="setPlayerSymbol(n)" :textColor="setTextColor(n)"
+          @field-clicked="getCurrentGameMode(n)" />
       </div>
     </div>
   </div>
@@ -52,6 +47,7 @@ export default {
       currentPlayer: this.selectedPlayer,
       player1Moves: [],
       player2Moves: [],
+      playerMoves: [],
       botPlayerMoves: [],
       winningCombination: [],
       performedMoves: []
@@ -75,7 +71,7 @@ export default {
 
   methods: {
     setPlayerSymbol(field) {
-      if (this.player1Moves.includes(field)) {
+      if (this.playerMoves.includes(field) || this.player1Moves.includes(field)) {
         return "O";
       }
       if (this.botPlayerMoves.includes(field) || this.player2Moves.includes(field)) {
@@ -125,7 +121,7 @@ export default {
 
     getBotNextMove() {
       let botNextMoves = [];
-      const playerNextBestMoves = this.getNextBestMoves(this.player1Moves);
+      const playerNextBestMoves = this.getNextBestMoves(this.playerMoves);
       const botNextBestMoves = this.getNextBestMoves(this.botPlayerMoves);
 
       if (botNextBestMoves.length) {
@@ -158,10 +154,10 @@ export default {
       }, 150);
     },
 
-    player1NextMove(move) {
-      this.player1Moves.push(move);
-      const player1Wins = this.checkVictory(this.player1Moves);
-      if (player1Wins) {
+    singleGameMode(move) {
+      this.playerMoves.push(move);
+      const playerWins = this.checkVictory(this.playerMoves);
+      if (playerWins) {
         this.$emit("player-wins", this.currentPlayer);
       } else {
         this.currentPlayer = "X";
@@ -170,23 +166,31 @@ export default {
       if (this.performedMoves.length === 9) {
         this.$emit("game-over");
       }
-      if (!player1Wins && this.selectedGameMode === "single") {
+      if (!playerWins) {
         this.botNextMove();
       }
     },
 
-    player2NextMove(move) {
-      this.player2Moves.push(move);
-      const player2Wins = this.checkVictory(this.player2Moves);
-      if (player2Wins) {
+    multiplayerGameMode(move) {
+      const currentPlayerMoves = this.currentPlayer === "O" ? this.player1Moves : this.player2Moves;
+      currentPlayerMoves.push(move);
+
+      const playerWins = this.checkVictory(currentPlayerMoves);
+      if (playerWins) {
         this.$emit("player-wins", this.currentPlayer);
       } else {
-        this.currentPlayer = "O";
+        this.currentPlayer = (this.currentPlayer === "O") ? "X" : "O";
       }
       this.performedMoves.push(move);
       if (this.performedMoves.length === 9) {
         this.$emit("game-over");
       }
+    },
+
+    getCurrentGameMode(move) {
+      return this.selectedGameMode === "single"
+        ? this.singleGameMode(move)
+        : this.multiplayerGameMode(move);
     },
 
     setTextColor(field) {
@@ -197,6 +201,7 @@ export default {
 
     resetGame() {
       this.currentPlayer = this.selectedPlayer;
+      this.playerMoves = [];
       this.botPlayerMoves = [];
       this.player1Moves = [];
       this.player2Moves = [];
