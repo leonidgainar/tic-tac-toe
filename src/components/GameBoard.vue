@@ -7,7 +7,7 @@
           :key="n"
           :playerSymbol="setPlayerSymbol(n)"
           :textColor="setTextColor(n)"
-          @field-clicked="playerNextMove(n)"
+          @field-clicked="currentPlayer === 'O' ? player1NextMove(n) : player2NextMove(n)"
         />
       </div>
     </div>
@@ -27,6 +27,10 @@ export default {
       type: String,
       default: "X"
     },
+    selectedGameMode: {
+      type: String,
+      default: "single"
+    },
     startNewGame: {
       type: Boolean,
       default: false
@@ -45,8 +49,9 @@ export default {
         [1, 5, 9],
         [3, 5, 7]
       ],
-      currentPlayer: "O",
-      humanPlayerMoves: [],
+      currentPlayer: this.selectedPlayer,
+      player1Moves: [],
+      player2Moves: [],
       botPlayerMoves: [],
       winningCombination: [],
       performedMoves: []
@@ -55,27 +60,30 @@ export default {
 
   watch: {
     startNewGame() {
-      this.currentPlayer = "O";
-      this.humanPlayerMoves = [];
+      this.currentPlayer = this.selectedPlayer;
       this.botPlayerMoves = [];
+      this.player1Moves = [];
+      this.player2Moves = [];
       this.winningCombination = [];
       this.performedMoves = [];
-      if (this.selectedPlayer === "X") {
+      if (this.selectedPlayer === "X" && this.selectedGameMode === "single") {
         this.botNextMove();
       }
     }
   },
 
   mounted() {
-    this.botNextMove();
+    if (this.selectedGameMode === "single") {
+      this.botNextMove();
+    }
   },
 
   methods: {
     setPlayerSymbol(field) {
-      if (this.humanPlayerMoves.includes(field)) {
+      if (this.player1Moves.includes(field)) {
         return "O";
       }
-      if (this.botPlayerMoves.includes(field)) {
+      if (this.botPlayerMoves.includes(field) || this.player2Moves.includes(field)) {
         return "X";
       }
     },
@@ -122,7 +130,7 @@ export default {
 
     getBotNextMove() {
       let botNextMoves = [];
-      const playerNextBestMoves = this.getNextBestMoves(this.humanPlayerMoves);
+      const playerNextBestMoves = this.getNextBestMoves(this.player1Moves);
       const botNextBestMoves = this.getNextBestMoves(this.botPlayerMoves);
 
       if (botNextBestMoves.length) {
@@ -155,10 +163,10 @@ export default {
       }, 150);
     },
 
-    playerNextMove(move) {
-      this.humanPlayerMoves.push(move);
-      const humanPlayer = this.checkVictory(this.humanPlayerMoves);
-      if (humanPlayer) {
+    player1NextMove(move) {
+      this.player1Moves.push(move);
+      const player1Wins = this.checkVictory(this.player1Moves);
+      if (player1Wins) {
         this.$emit("player-wins", this.currentPlayer);
       } else {
         this.currentPlayer = "X";
@@ -167,8 +175,22 @@ export default {
       if (this.performedMoves.length === 9) {
         this.$emit("game-over");
       }
-      if (!humanPlayer) {
+      if (!player1Wins && this.selectedGameMode === "single") {
         this.botNextMove();
+      }
+    },
+
+    player2NextMove(move) {
+      this.player2Moves.push(move);
+      const player2Wins = this.checkVictory(this.player2Moves);
+      if (player2Wins) {
+        this.$emit("player-wins", this.currentPlayer);
+      } else {
+        this.currentPlayer = "O";
+      }
+      this.performedMoves.push(move);
+      if (this.performedMoves.length === 9) {
+        this.$emit("game-over");
       }
     },
 
