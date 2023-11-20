@@ -60,15 +60,10 @@ export default {
 
   watch: {
     startNewGame() {
-      this.currentPlayer = this.selectedPlayer;
-      this.botPlayerMoves = [];
-      this.player1Moves = [];
-      this.player2Moves = [];
-      this.winningCombination = [];
-      this.performedMoves = [];
-      if (this.selectedPlayer === "X" && this.selectedGameMode === "single") {
-        this.botNextMove();
-      }
+      this.resetGame();
+    },
+    selectedGameMode() {
+      this.resetGame();
     }
   },
 
@@ -198,6 +193,18 @@ export default {
       return this.winningCombination.includes(field)
         ? "text-black"
         : "text-white";
+    },
+
+    resetGame() {
+      this.currentPlayer = this.selectedPlayer;
+      this.botPlayerMoves = [];
+      this.player1Moves = [];
+      this.player2Moves = [];
+      this.winningCombination = [];
+      this.performedMoves = [];
+      if (this.selectedPlayer === "X" && this.selectedGameMode === "single") {
+        this.botNextMove();
+      }
     }
   }
 };
